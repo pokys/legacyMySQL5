@@ -1,0 +1,47 @@
+name: Build Docker for legacyMySQL5
+
+on:
+  schedule:
+    - cron: '30 2 * * *'  
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  push_to_registry:
+    name: push docker image to hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: check repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and push multi-platform latest
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            pokys/legacyMySQL5:latest
+          platforms: linux/amd64,linux/arm64
+
+      - name: "Commit last state"
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "robot@github.invalid"
+          date > lastrun
+          git add lastrun || true
+          git commit -m "Update last run (autocommit)" || true
+          git push
