@@ -34,7 +34,7 @@ jobs:
           context: .
           push: true
           tags: |
-            pokys/legacyMySQL5:latest
+            pokys/legacymysql5:latest
           platforms: linux/amd64,linux/arm64
 
       - name: "Commit last state"
